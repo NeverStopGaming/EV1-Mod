@@ -12,7 +12,7 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.util.ARGB
 
 
-open class BaseQuestScreen : Screen(Component.literal("Quest Screen")) {
+open class BaseQuestScreen(open val parent : Screen?) : Screen(Component.literal("Quest Screen")) {
 
     val texture: ResourceLocation = ResourceLocation.fromNamespaceAndPath("ev1", "textures/gui/book.png")
 
@@ -79,8 +79,7 @@ open class BaseQuestScreen : Screen(Component.literal("Quest Screen")) {
         if(!mouseButtonEvent.isDown && mouseButtonEvent.button() != 0) return bl
 
         if (isArrowBackHover) {
-            // TODO: open Parent Screen
-            turnPage(MenuQuestScreen)
+            turnPage(parent)
         }
         else if (isArrowMenuHover) {
             turnPage(MenuQuestScreen)
@@ -101,15 +100,13 @@ open class BaseQuestScreen : Screen(Component.literal("Quest Screen")) {
         return px in left..right && py in top..bottom
     }
 
-    fun turnPage(screen: Screen) {
+    fun turnPage(screen: Screen?) {
         Minecraft.getInstance().player?.playSound(SoundEvents.BOOK_PAGE_TURN)
         Minecraft.getInstance().setScreen(screen)
     }
 
     override fun isPauseScreen() = false
 
-    open fun updateContentDimensions() {
-
-    }
+    open fun updateContentDimensions() {}
 
 }

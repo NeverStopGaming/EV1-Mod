@@ -1,7 +1,12 @@
 package net.derfarmer
 
+import net.derfarmer.quest.Quest
 import net.derfarmer.quest.QuestCategory
+import net.derfarmer.quest.QuestCondition
+import net.derfarmer.quest.QuestConditionType
 import net.derfarmer.quest.QuestNode
+import net.derfarmer.quest.QuestReward
+import net.derfarmer.quest.QuestRewardType
 import kotlin.collections.mutableListOf
 
 object QuestManager {
@@ -11,7 +16,7 @@ object QuestManager {
             QuestCategory(1,"1. Basic Survival", 87),
             QuestCategory(2,"2. Culinary Delights", 18),
             QuestCategory(3,"3. Warum tut ich das hier", 69),
-            QuestCategory(4,"4. Kill me", 420),
+            QuestCategory(4,"4. Nice", 420),
             QuestCategory(5,"5. Last mich raus ...", -1),
             QuestCategory(6,"6. ich bin in einen", 43),
             QuestCategory(7,"7. Questbuch gefangen", 64),
@@ -20,8 +25,21 @@ object QuestManager {
 
     fun getQuestTree(questTreeId : Int ) : List<QuestNode> {
         return mutableListOf(
-            QuestNode(10, "stone", 30, 30, true, listOf(Pair(100,100))),
-            QuestNode(12, "diamond_sword", 100, 100, true, listOf())
+            QuestNode(10, "stone", "The Rock",30, 30, true, listOf(Pair(100,100))),
+            QuestNode(12, "diamond_sword","Kill Panda 100mal", 100, 100, false, listOf())
         )
+    }
+
+    fun getQuest(questId : Int) : Quest {
+
+        val des = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,"
+
+        return Quest(questId, "Das ist der Title", des, des,
+            listOf(QuestReward(QuestRewardType.RECIPES_UNLOCK, "iron", "iron_ingot", "Unlock Iron Age"),
+                            QuestReward(QuestRewardType.RECIPES_UNLOCK, "iron", "diamond", "Unlock Iron Age"),
+                            QuestReward(QuestRewardType.RECIPES_UNLOCK, "iron", "diamond", "Unlock Iron Age"),
+                            QuestReward(QuestRewardType.RECIPES_UNLOCK, "iron", "diamond", "Unlock Iron Age"),
+                            QuestReward(QuestRewardType.RECIPES_UNLOCK, "iron", "diamond", "Unlock Iron Age")
+                        ), listOf(QuestCondition(QuestConditionType.SUBMIT_ITEM,"stone", 10, 0)))
     }
 }

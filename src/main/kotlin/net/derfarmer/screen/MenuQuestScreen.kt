@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.ARGB
 
-object MenuQuestScreen : BaseQuestScreen() {
+object MenuQuestScreen : BaseQuestScreen(null) {
 
     val logo: ResourceLocation = ResourceLocation.fromNamespaceAndPath("ev1", "icon.png")
 
@@ -99,8 +99,8 @@ object MenuQuestScreen : BaseQuestScreen() {
     override fun mouseClicked(mouseButtonEvent: MouseButtonEvent, bl: Boolean): Boolean {
         if (hoverdID == 0) return false
 
-        turnPage(QuestTreeScreen(hoverdID))
+        turnPage(QuestTreeScreen(hoverdID, this))
 
-        return bl
+        return super.mouseClicked(mouseButtonEvent, bl)
     }
 }
