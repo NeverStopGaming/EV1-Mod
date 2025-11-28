@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "ev1",
+	"version": "${version}",
+	"name": "EV1",
+	"description": "Companion mod for the EV1 SMP",
+	"authors": [
+		"BenderFarmer"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0 1.0 Universale",
+	"icon": "assets/ev1/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			{
+				"value": "net.derfarmer.EV1Mod",
+				"adapter": "kotlin"
+			}
+		]
+	},
+	"mixins": [
+		"ev1.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.18.1",
+		"minecraft": "~1.21.10",
+		"java": ">=21",
+		"fabric-api": "*",
+		"fabric-language-kotlin": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
