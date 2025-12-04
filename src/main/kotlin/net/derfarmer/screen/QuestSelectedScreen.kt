@@ -1,70 +1,134 @@
 package net.derfarmer.screen
 
 import net.derfarmer.QuestManager
-import net.derfarmer.quest.QuestReward
+import net.derfarmer.quest.Quest
 import net.derfarmer.utils.GuiHelper
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
-import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.util.ARGB
 import net.minecraft.world.item.ItemStack
+import kotlin.jvm.optionals.getOrDefault
 
-class QuestSelectedScreen(val questId : Int, override val parent : Screen?) : BaseQuestScreen(parent) {
+class QuestSelectedScreen(val questId: Int, override val parent: Screen?) : BaseQuestScreen(parent) {
 
-    val quest = QuestManager.getQuest(questId)
+    val white = ARGB.opaque(0xFFfafa)
+
+    var quest: Quest? = null
+
+    init {
+        QuestManager.requestQuest(questId)
+    }
+
+    override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
+
+        if (quest == null) {
+            context.drawString(
+                minecraft!!.font,
+                "Lade Daten.",
+                bgStartX + padding,
+                bgStartY + padding,
+                textColor,
+                false
+            )
+            return
+        }
+
+        render(context, mouseX, mouseY, quest!!)
+    }
 
     val padding = 20
     var halfWidth = lastContextWidth shr 1
     var bgStartX = halfWidth - bgWidth
-    var bgStartY = lastContextHeight - bgHeight  shr 1
+    var bgStartY = lastContextHeight - bgHeight shr 1
 
-    override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
+    fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, quest: Quest) {
+        context.drawString(minecraft!!.font, quest.title, bgStartX + padding, bgStartY + padding, textColor, false)
 
-        context.drawString(minecraft!!.font, quest.title, bgStartX + padding, bgStartY + padding, textColor,false)
+        GuiHelper.drawWrapStringScaled(
+            context, quest.description,
+            bgStartX + padding, bgStartY + padding + 20, (bgWidth shr 1) - padding * 2, textColor, 0.75f, false
+        )
 
-        GuiHelper.drawWrapStringScaled(context, quest.description,
-            bgStartX + padding, bgStartY + padding + 20, (bgWidth shr 1) - padding * 2, textColor, 0.75f, false)
+        GuiHelper.drawWrapStringScaled(
+            context, quest.description2,
+            halfWidth + padding, bgStartY + padding + 20, (bgWidth shr 1) - padding * 2, textColor, 0.75f, false
+        )
 
-        GuiHelper.drawWrapStringScaled(context, quest.description2,
-             halfWidth + padding,  bgStartY + padding + 20, (bgWidth shr 1) - padding * 2, textColor, 0.75f, false)
+        context.drawString(minecraft!!.font, "Belohnung", bgStartX + padding, bgStartY + 170, textColor, false)
 
-        context.drawString(minecraft!!.font, "Belohnung", bgStartX + padding, bgStartY + 170, textColor,false)
+        drawRewards(context, bgStartX + padding, bgStartY + 180, mouseX, mouseY, quest)
 
-        drawRewards(context,bgStartX + padding, bgStartY + 180, mouseX, mouseY)
-
-        drawConditions(context, mouseX, mouseY)
+        drawConditions(context, mouseX, mouseY, quest)
     }
 
     val itemBgU = 406f
     val itemBgWidth = 16
     val itemBgHeight = 16
 
-    fun drawRewards(context : GuiGraphics, bgStartX : Int, bgStartY : Int, mouseX: Int, mouseY: Int) {
+    fun drawRewards(context: GuiGraphics, bgStartX: Int, bgStartY: Int, mouseX: Int, mouseY: Int, quest: Quest) {
         for ((i, reward) in quest.rewards.withIndex()) {
-            drawItem(context, padding * i + bgStartX, bgStartY, mouseX, mouseY, reward)
+            drawItem(context, padding * i + bgStartX, bgStartY, mouseX, mouseY, reward.iconID, reward.tooltip)
         }
     }
 
-    fun drawItem(context : GuiGraphics, startX : Int, startY : Int, mouseX: Int, mouseY: Int, reward: QuestReward) {
+    fun drawItem(
+        context: GuiGraphics,
+        startX: Int,
+        startY: Int,
+        mouseX: Int,
+        mouseY: Int,
+        iconID: String,
+        tooltip: String
+    ) {
         val isHover = isPointInRect(mouseX, mouseY, startX, startY, startX + itemBgWidth, startY + itemBgHeight)
 
-        context.blit(RenderPipelines.GUI_TEXTURED,texture, startX, startY,
-            itemBgU, if(isHover) itemBgHeight.toFloat() else 0f, itemBgWidth, itemBgHeight, 512, 256)
+        GuiHelper.drawTextureScaled(
+        context, texture, startX.toFloat(), startY.toFloat(),
+            itemBgU, if (isHover) itemBgHeight.toFloat() else 0f, itemBgWidth, itemBgHeight, 512, 256, 1.2f
+        )
 
-        val item = BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace(reward.iconID)).get()
+        val item = ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace(iconID)).getOrDefault(null) ?: return)
 
-        GuiHelper.drawItemScaled(context,ItemStack(item), startX + 1.6f, startY + 1.6f, 0.8f)
+        if (isHover) {
+            context.setTooltipForNextFrame(Component.literal(tooltip), mouseX, mouseY)
+        }
+
+        GuiHelper.drawItemScaled(context, item, startX + 1.6f, startY + 1.6f, 1f)
     }
 
-    fun drawConditions(context: GuiGraphics, mouseX: Int, mouseY: Int)  {
+    fun drawConditions(context: GuiGraphics, mouseX: Int, mouseY: Int, quest: Quest) {
 
+        // TODO: Draw Submit Or Detect button
 
+        for ((i, conditions) in quest.conditions.withIndex()) {
+
+            val startX = padding * i + halfWidth + padding
+            val startY = bgStartY + 120
+
+            drawItem(
+                context,
+                startX,
+                startY,
+                mouseX,
+                mouseY,
+                conditions.id,
+                conditions.tooltip + " (${conditions.currentAmount}/${conditions.amount})"
+            )
+
+            val progress = (100 / conditions.amount) * conditions.currentAmount
+
+            GuiHelper.drawStringScaled(context, "$progress%",
+                startX + 1.6f, startY + (itemBgHeight * 1.2f) - (minecraft!!.font.lineHeight * 0.8f),
+                if(progress == 100) MenuQuestScreen.textColorComplete else white, 0.7f, true)
+        }
     }
 
     override fun updateContentDimensions() {
-        bgStartX = lastContextWidth - bgWidth  shr 1
-        bgStartY = lastContextHeight - bgHeight  shr 1
+        bgStartX = lastContextWidth - bgWidth shr 1
+        bgStartY = lastContextHeight - bgHeight shr 1
         halfWidth = lastContextWidth shr 1
     }
 }

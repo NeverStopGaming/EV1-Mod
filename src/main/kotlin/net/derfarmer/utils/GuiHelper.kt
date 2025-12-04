@@ -2,24 +2,20 @@ package net.derfarmer.utils
 
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.network.chat.FormattedText
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.ItemStack
-import kotlin.math.PI
 import kotlin.math.atan2
-import kotlin.math.atanh
-import kotlin.math.cos
-import kotlin.math.cosh
-import kotlin.math.sin
-import kotlin.math.sinh
-import kotlin.math.tan
+
 
 object GuiHelper {
 
     fun drawStringScaled(
         graphics: GuiGraphics,
         text: String,
-        x: Int,
-        y: Int,
+        x: Float,
+        y: Float,
         color: Int,
         scale: Float,
         shadow: Boolean = false
@@ -31,7 +27,7 @@ object GuiHelper {
 
         val poseStack = graphics.pose()
         poseStack.pushMatrix()
-        poseStack.translate(x.toFloat(), y.toFloat())
+        poseStack.translate(x, y)
         poseStack.scale(scale, scale)
         graphics.drawString(Minecraft.getInstance().font, text, 0, 0, color, shadow)
         poseStack.popMatrix()
@@ -56,9 +52,27 @@ object GuiHelper {
         poseStack.pushMatrix()
         poseStack.translate(x.toFloat(), y.toFloat())
         poseStack.scale(scale, scale)
-        graphics.drawWordWrap(Minecraft.getInstance().font, FormattedText.of(text), 0,0,
-            (width / scale).toInt(), color, shadow)
+        graphics.drawWordWrap(
+            Minecraft.getInstance().font, FormattedText.of(text), 0, 0,
+            (width / scale).toInt(), color, shadow
+        )
         poseStack.popMatrix()
+    }
+
+    fun drawTextureScaled(context: GuiGraphics, resourceLocation : ResourceLocation, x: Float, y: Float,  u : Float, v : Float,width: Int, height : Int,
+                          textureWidth : Int, textureHeight: Int, scale : Float) {
+        val matrix = context.pose()
+        matrix.pushMatrix()
+
+        matrix.translate(x, y)
+        matrix.scale(scale, scale)
+
+        context.blit(
+            RenderPipelines.GUI_TEXTURED,resourceLocation, 0, 0,
+            u, v, width, height, textureWidth, textureHeight
+        )
+
+        matrix.popMatrix()
     }
 
     fun drawLine(context: GuiGraphics, line: Line) {
@@ -80,14 +94,14 @@ object GuiHelper {
         matrix.popMatrix()
     }
 
-    data class Line(val fromX : Int, val fromY : Int, val toX : Int, val toY : Int, val width : Int, val color : Int) {}
+    data class Line(val fromX: Int, val fromY: Int, val toX: Int, val toY: Int, val width: Int, val color: Int) {}
 
-    fun drawItemScaled(context: GuiGraphics, item : ItemStack, x : Float, y : Float, scale : Float) {
+    fun drawItemScaled(context: GuiGraphics, item: ItemStack, x: Float, y: Float, scale: Float) {
         val poseStack = context.pose()
         poseStack.pushMatrix()
         poseStack.translate(x, y)
         poseStack.scale(scale, scale)
-        context.renderItem(item,0,0)
+        context.renderItem(item, 0, 0)
         poseStack.popMatrix()
     }
 }

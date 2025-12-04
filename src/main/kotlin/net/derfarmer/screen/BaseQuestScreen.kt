@@ -1,6 +1,6 @@
 package net.derfarmer.screen
 
-import net.derfarmer.EV1Mod
+import net.derfarmer.QuestManager
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
@@ -12,7 +12,7 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.util.ARGB
 
 
-open class BaseQuestScreen(open val parent : Screen?) : Screen(Component.literal("Quest Screen")) {
+open class BaseQuestScreen(open val parent: Screen?) : Screen(Component.literal("Quest Screen")) {
 
     val texture: ResourceLocation = ResourceLocation.fromNamespaceAndPath("ev1", "textures/gui/book.png")
 
@@ -32,10 +32,10 @@ open class BaseQuestScreen(open val parent : Screen?) : Screen(Component.literal
             updateContentDimensions()
         }
 
-        val bgStartX = context.guiWidth() - bgWidth  shr 1
+        val bgStartX = context.guiWidth() - bgWidth shr 1
         val bgStartY = context.guiHeight() - bgHeight shr 1
 
-        context.blit(RenderPipelines.GUI_TEXTURED, texture, bgStartX, bgStartY, 0f,0f,bgWidth, bgHeight, 512, 256)
+        context.blit(RenderPipelines.GUI_TEXTURED, texture, bgStartX, bgStartY, 0f, 0f, bgWidth, bgHeight, 512, 256)
 
         drawArrows(context, mouseX, mouseY)
     }
@@ -53,46 +53,49 @@ open class BaseQuestScreen(open val parent : Screen?) : Screen(Component.literal
     var isArrowBackHover = false
     var isArrowMenuHover = false
 
-    fun drawArrows(context : GuiGraphics, mouseX: Int, mouseY: Int) {
+    fun drawArrows(context: GuiGraphics, mouseX: Int, mouseY: Int) {
 
         val xAMenu = (context.guiWidth() - arrowMenuWidth) shr 1
         val yAMenu = context.guiHeight() / 2 + bgHeight / 2 - 10
 
-        val xABack =  (context.guiWidth() / 2 - bgWidth / 2) + 10
-        val yABack =  context.guiHeight() / 2 + bgHeight / 2 - 10
+        val xABack = (context.guiWidth() / 2 - bgWidth / 2) + 10
+        val yABack = context.guiHeight() / 2 + bgHeight / 2 - 10
 
-        isArrowBackHover= isArrowBackHovered(xABack, yABack, mouseX, mouseY)
+        isArrowBackHover = isArrowBackHovered(xABack, yABack, mouseX, mouseY)
         isArrowMenuHover = isArrowMenuHovered(xAMenu, yAMenu, mouseX, mouseY)
 
         val offsetABack = if (isArrowBackHover) arrowHoverOffset else 0f
         val offsetAMenu = if (isArrowMenuHover) arrowHoverOffset else 0f
 
-        context.blit(RenderPipelines.GUI_TEXTURED, texture, xAMenu, yAMenu,
-                arrowMenuU,offsetAMenu,arrowMenuWidth, arrowMenuHeight, 512, 256)
+        context.blit(
+            RenderPipelines.GUI_TEXTURED, texture, xAMenu, yAMenu,
+            arrowMenuU, offsetAMenu, arrowMenuWidth, arrowMenuHeight, 512, 256
+        )
 
-        context.blit(RenderPipelines.GUI_TEXTURED, texture, xABack, yABack,
-            arrowBackU,offsetABack,arrowBackWidth, arrowBackHeight, 512, 256)
+        context.blit(
+            RenderPipelines.GUI_TEXTURED, texture, xABack, yABack,
+            arrowBackU, offsetABack, arrowBackWidth, arrowBackHeight, 512, 256
+        )
 
     }
 
     override fun mouseClicked(mouseButtonEvent: MouseButtonEvent, bl: Boolean): Boolean {
-        if(!mouseButtonEvent.isDown && mouseButtonEvent.button() != 0) return bl
+        if (!mouseButtonEvent.isDown && mouseButtonEvent.button() != 0) return bl
 
         if (isArrowBackHover) {
             turnPage(parent)
-        }
-        else if (isArrowMenuHover) {
+        } else if (isArrowMenuHover) {
             turnPage(MenuQuestScreen)
         }
 
         return bl
     }
 
-    fun isArrowMenuHovered(aX : Int, aY : Int, mouseX: Int, mouseY: Int) : Boolean {
-        return isPointInRect(mouseX,mouseY, aX , aY, aX + arrowMenuWidth, aY + arrowMenuHeight)
+    fun isArrowMenuHovered(aX: Int, aY: Int, mouseX: Int, mouseY: Int): Boolean {
+        return isPointInRect(mouseX, mouseY, aX, aY, aX + arrowMenuWidth, aY + arrowMenuHeight)
     }
 
-    fun isArrowBackHovered(aX : Int, aY : Int, mouseX: Int, mouseY: Int) : Boolean {
+    fun isArrowBackHovered(aX: Int, aY: Int, mouseX: Int, mouseY: Int): Boolean {
         return isPointInRect(mouseX, mouseY, aX, aY, aX + arrowBackWidth, aY + arrowBackHeight)
     }
 
@@ -103,10 +106,19 @@ open class BaseQuestScreen(open val parent : Screen?) : Screen(Component.literal
     fun turnPage(screen: Screen?) {
         Minecraft.getInstance().player?.playSound(SoundEvents.BOOK_PAGE_TURN)
         Minecraft.getInstance().setScreen(screen)
+
+
+        if (screen is BaseQuestScreen) {
+            QuestManager.currentQuestScreen = screen;
+        }
     }
 
     override fun isPauseScreen() = false
 
     open fun updateContentDimensions() {}
+
+    override fun onClose() {
+        super.onClose()
+    }
 
 }

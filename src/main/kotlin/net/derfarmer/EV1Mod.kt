@@ -1,5 +1,6 @@
 package net.derfarmer
 
+import com.google.gson.Gson
 import net.derfarmer.screen.MenuQuestScreen
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -15,17 +16,19 @@ object EV1Mod : ModInitializer {
     val logger = LoggerFactory.getLogger("ev1-mod")
 
     private val runCommand: KeyMapping =
-        KeyBindingHelper.registerKeyBinding(KeyMapping("key.quest.open", GLFW.GLFW_KEY_K, KeyMapping.Category.GAMEPLAY))
+        KeyBindingHelper.registerKeyBinding(KeyMapping("key.quest.open", GLFW.GLFW_KEY_Y, KeyMapping.Category.GAMEPLAY))
 
-	override fun onInitialize() {
+    override fun onInitialize() {
         ClientPlayConnectionEvents.JOIN.register { handler, sender, client ->
-            MessageManger.isFirstMessage = false
+            MessageManager.isFirstMessage = false
         }
 
         ClientTickEvents.END_CLIENT_TICK.register(ClientTickEvents.EndTick { _: Minecraft ->
             if (runCommand.isDown) {
-                Minecraft.getInstance().setScreen(MenuQuestScreen)
+                QuestManager.openBook()
             }
         })
     }
+
+    val gson = Gson()
 }

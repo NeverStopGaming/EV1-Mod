@@ -2,44 +2,48 @@ package net.derfarmer
 
 import net.derfarmer.quest.Quest
 import net.derfarmer.quest.QuestCategory
-import net.derfarmer.quest.QuestCondition
-import net.derfarmer.quest.QuestConditionType
 import net.derfarmer.quest.QuestNode
-import net.derfarmer.quest.QuestReward
-import net.derfarmer.quest.QuestRewardType
-import kotlin.collections.mutableListOf
+import net.derfarmer.screen.BaseQuestScreen
+import net.derfarmer.screen.MenuQuestScreen
+import net.derfarmer.screen.QuestSelectedScreen
+import net.derfarmer.screen.QuestTreeScreen
+import net.minecraft.client.Minecraft
 
 object QuestManager {
 
-    fun getQuestCategorys() : List<QuestCategory> {
-         return mutableListOf<QuestCategory>(
-            QuestCategory(1,"1. Basic Survival", 87),
-            QuestCategory(2,"2. Culinary Delights", 18),
-            QuestCategory(3,"3. Warum tut ich das hier", 69),
-            QuestCategory(4,"4. Nice", 420),
-            QuestCategory(5,"5. Last mich raus ...", -1),
-            QuestCategory(6,"6. ich bin in einen", 43),
-            QuestCategory(7,"7. Questbuch gefangen", 64),
-        )
+    var currentQuestScreen: BaseQuestScreen? = null
+
+    fun requestCategorys() = MessageManager.sendMessage("c")
+
+    fun requestQuestTree(questTreeId: Int) = MessageManager.sendMessage("l$questTreeId")
+
+    fun requestQuest(questId: Int) = MessageManager.sendMessage("q$questId")
+
+    fun receiveCategorys(data: String) {
+        if (currentQuestScreen !is MenuQuestScreen) return
+        val screen = currentQuestScreen as MenuQuestScreen
+
+        screen.bakeCategory(EV1Mod.gson.fromJson<Array<QuestCategory>>(data, arrayOf<QuestCategory>()::class.java).toList())
     }
 
-    fun getQuestTree(questTreeId : Int ) : List<QuestNode> {
-        return mutableListOf(
-            QuestNode(10, "stone", "The Rock",30, 30, true, listOf(Pair(100,100))),
-            QuestNode(12, "diamond_sword","Kill Panda 100mal", 100, 100, false, listOf())
-        )
+    fun receiveQuestTree(data: String) {
+        if (currentQuestScreen !is QuestTreeScreen) return
+        val screen = currentQuestScreen as QuestTreeScreen
+
+        screen.bakeNodes(EV1Mod.gson.fromJson<Array<QuestNode>>(data, arrayOf<QuestNode>()::class.java).toList())
     }
 
-    fun getQuest(questId : Int) : Quest {
+    fun receiveQuest(data: String) {
+        if (currentQuestScreen !is QuestSelectedScreen) return
+        val screen = currentQuestScreen as QuestSelectedScreen
 
-        val des = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,"
+        screen.quest = EV1Mod.gson.fromJson<Quest>(data, Quest::class.java)
+    }
 
-        return Quest(questId, "Das ist der Title", des, des,
-            listOf(QuestReward(QuestRewardType.RECIPES_UNLOCK, "iron", "iron_ingot", "Unlock Iron Age"),
-                            QuestReward(QuestRewardType.RECIPES_UNLOCK, "iron", "diamond", "Unlock Iron Age"),
-                            QuestReward(QuestRewardType.RECIPES_UNLOCK, "iron", "diamond", "Unlock Iron Age"),
-                            QuestReward(QuestRewardType.RECIPES_UNLOCK, "iron", "diamond", "Unlock Iron Age"),
-                            QuestReward(QuestRewardType.RECIPES_UNLOCK, "iron", "diamond", "Unlock Iron Age")
-                        ), listOf(QuestCondition(QuestConditionType.SUBMIT_ITEM,"stone", 10, 0)))
+    fun openBook() {
+        if (Minecraft.getInstance().isSingleplayer) return
+        currentQuestScreen = MenuQuestScreen
+        requestCategorys()
+        Minecraft.getInstance().setScreen(MenuQuestScreen)
     }
 }

@@ -1,6 +1,6 @@
 package net.derfarmer.mixin;
 
-import net.derfarmer.MessageManger;
+import net.derfarmer.MessageManager;
 import net.minecraft.client.multiplayer.chat.ChatListener;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class OnChatMessage {
     @Inject(method = "handleSystemMessage", at = @At("HEAD"), cancellable = true)
     public void onGameMessage(Component message, boolean overlay, CallbackInfo info) {
-        if (MessageManger.INSTANCE.receive(message)) info.cancel();
+        if (MessageManager.INSTANCE.receive(message)) info.cancel();
     }
 }
