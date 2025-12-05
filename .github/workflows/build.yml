@@ -71,7 +71,9 @@ jobs:
 
           echo "Gefundene JAR: $JAR"
           echo "jar=$JAR" >> "$GITHUB_OUTPUT"
-          echo "jar_name=$(basename "$JAR")" >> "$GITHUB_OUTPUT"
+          JARNAME=$(basename "$JAR")
+          echo "jar=$JAR" >> "$GITHUB_OUTPUT"
+          echo "jarname=$JARNAME" >> "$GITHUB_OUTPUT"
 
       - name: Read gradle properties
         id: gradleprops
@@ -99,7 +101,7 @@ jobs:
           echo "Loaders: $LOADERS"
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "game_versions=$GAME_VERSIONS_LIST" >> "$GITHUB_OUTPUT"
+          echo "game_versions=1.20" >> "$GITHUB_OUTPUT"
           echo "loaders=$LOADERS" >> "$GITHUB_OUTPUT"
 
       - name: Modrinth Publish
@@ -111,7 +113,7 @@ jobs:
           project: ${{ secrets.MODRINTH_PROJECT_ID }}
           files: ${{ steps.findjar.outputs.jar }}
           # Primary-File nur der Dateiname, nicht der Pfad
-          primary-file: ${{ steps.findjar.outputs.jar_name }}
+          primary-file: ${{ steps.findjar.outputs.jarname }}
           name: v${{ steps.gradleprops.outputs.version }}
           version: ${{ steps.gradleprops.outputs.version }}
           changelog: Automated publish from GitHub Actions
