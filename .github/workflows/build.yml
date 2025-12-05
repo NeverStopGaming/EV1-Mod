@@ -1,31 +1,35 @@
-# Automatically build the project and run any configured tests for every push
-# and submitted pull request. This can help catch issues that only occur on
-# certain platforms or Java versions, and provides a first line of defence
-# against bad commits.
-
 name: build
+
 on:
-  pull_request: {}
   push: {}
+  pull_request: {}
+
+permissions:
+  contents: write # nötig für GitHub Releases
 
 jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - name: checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: validate gradle wrapper
+
+      - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
-      - name: setup jdk
+
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           java-version: "21"
           distribution: "microsoft"
-      - name: make gradle wrapper executable
+
+      - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
-      - name: build
+
+      - name: Build
         run: ./gradlew build
-      - name: capture build artifacts
+
+      - name: Capture build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Artifacts
@@ -37,60 +41,77 @@ jobs:
     runs-on: ubuntu-24.04
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - name: checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: download build artifacts
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: Artifacts
           path: artifacts
 
-      - name: find built jar
+      - name: List artifacts for debugging
+        run: ls -R artifacts || echo "No artifacts found"
+
+      - name: Find built JAR (ohne -sources/-javadoc)
         id: findjar
         run: |
           shopt -s nullglob || true
-          # Prefer a non-sources jar (exclude files containing 'sources' or 'javadoc')
-          JAR=$(ls artifacts/*.jar 2>/dev/null | grep -viE 'sources|javadoc' | head -n 1 || true)
-          # Fallback to any jar if no primary jar found
+          # Alle Jars auflisten, aber sources/javadoc rausfiltern
+          JAR=$(ls artifacts/*.jar 2>/dev/null | grep -vE '(-sources|-javadoc)\.jar$' | head -n 1 || true)
+
           if [ -z "$JAR" ]; then
-            JAR=$(ls artifacts/*.jar 2>/dev/null | head -n 1 || true)
-          fi
-          if [ -z "$JAR" ]; then
-            echo "No JAR found in artifacts/" >&2
+            echo "No non-sources/non-javadoc JAR found in artifacts/" >&2
+            echo "Gefundene JARs (inkl. sources/javadoc, falls vorhanden):" >&2
+            ls artifacts/*.jar 2>/dev/null || echo "Keine JAR-Dateien gefunden" >&2
             exit 1
           fi
-          echo "jar=$JAR" >> $GITHUB_OUTPUT
 
-      - name: read gradle properties
+          echo "Gefundene JAR: $JAR"
+          echo "jar=$JAR" >> "$GITHUB_OUTPUT"
+          echo "jar_name=$(basename "$JAR")" >> "$GITHUB_OUTPUT"
+
+      - name: Read gradle properties
         id: gradleprops
         run: |
           if [ ! -f gradle.properties ]; then
             echo "gradle.properties not found" >&2
             exit 1
           fi
+
           VERSION=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2- | tr -d '\r')
-          # We mark compatibility with all 1.20.x versions per repo request
+
+          # Minecraft-Versionen (alle 1.20.x)
           GAME_VERSIONS_LIST="1.20.0,1.20.1,1.20.2,1.20.3,1.20.4,1.20.5,1.20.6,1.20.7,1.20.8,1.20.9,1.20.10"
-          # Default loader to fabric; change to comma-separated list to support more loaders
+
+          # Loader (kannst du ggf. anpassen, z.B. "fabric,quilt")
           LOADERS="fabric"
+
           if [ -z "$VERSION" ]; then
             echo "mod_version not set in gradle.properties" >&2
             exit 1
           fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "game_versions=$GAME_VERSIONS_LIST" >> $GITHUB_OUTPUT
-          echo "loaders=$LOADERS" >> $GITHUB_OUTPUT
+
+          echo "Version: $VERSION"
+          echo "Game versions: $GAME_VERSIONS_LIST"
+          echo "Loaders: $LOADERS"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "game_versions=$GAME_VERSIONS_LIST" >> "$GITHUB_OUTPUT"
+          echo "loaders=$LOADERS" >> "$GITHUB_OUTPUT"
 
       - name: Modrinth Publish
         uses: cloudnode-pro/modrinth-publish@v2.1.5
         with:
+          # in Repo-Secrets hinterlegt:
+          # MODRINTH_TOKEN, MODRINTH_PROJECT_ID
           token: ${{ secrets.MODRINTH_TOKEN }}
           project: ${{ secrets.MODRINTH_PROJECT_ID }}
-          # Pass the exact jar path found earlier so the action can open the file
           files: ${{ steps.findjar.outputs.jar }}
+          # Primary-File nur der Dateiname, nicht der Pfad
+          primary-file: ${{ steps.findjar.outputs.jar_name }}
           name: v${{ steps.gradleprops.outputs.version }}
           version: ${{ steps.gradleprops.outputs.version }}
           changelog: Automated publish from GitHub Actions
@@ -102,3 +123,5 @@ jobs:
         with:
           tag: v${{ steps.gradleprops.outputs.version }}
           name: v${{ steps.gradleprops.outputs.version }}
+          artifacts: ${{ steps.findjar.outputs.jar }}
+          artifactContentType: application/java-archive
