@@ -52,7 +52,12 @@ jobs:
         id: findjar
         run: |
           shopt -s nullglob || true
-          JAR=$(ls artifacts/*.jar 2>/dev/null | head -n 1 || true)
+          # Prefer a non-sources jar (exclude files containing 'sources' or 'javadoc')
+          JAR=$(ls artifacts/*.jar 2>/dev/null | grep -viE 'sources|javadoc' | head -n 1 || true)
+          # Fallback to any jar if no primary jar found
+          if [ -z "$JAR" ]; then
+            JAR=$(ls artifacts/*.jar 2>/dev/null | head -n 1 || true)
+          fi
           if [ -z "$JAR" ]; then
             echo "No JAR found in artifacts/" >&2
             exit 1
@@ -86,7 +91,6 @@ jobs:
           project: ${{ secrets.MODRINTH_PROJECT_ID }}
           # Pass the exact jar path found earlier so the action can open the file
           files: ${{ steps.findjar.outputs.jar }}
-          primary-file: ${{ steps.findjar.outputs.jar }}
           name: v${{ steps.gradleprops.outputs.version }}
           version: ${{ steps.gradleprops.outputs.version }}
           changelog: Automated publish from GitHub Actions
