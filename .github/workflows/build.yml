@@ -83,17 +83,16 @@ jobs:
         uses: cloudnode-pro/modrinth-publish@v2.1.5
         with:
           token: ${{ secrets.MODRINTH_TOKEN }}
-          project_id: ${{ secrets.MODRINTH_PROJECT_ID }}
-          file: ${{ steps.findjar.outputs.jar }}
-          version_name: ${{ steps.gradleprops.outputs.version }}
-          version_type: release
-          game_versions: ${{ steps.gradleprops.outputs.game_versions }}
-          loaders: ${{ steps.gradleprops.outputs.loaders }}
+          project: ${{ secrets.MODRINTH_PROJECT_ID }}
+          files: artifacts/*.jar
+          name: v${{ steps.gradleprops.outputs.version }}
+          version: ${{ steps.gradleprops.outputs.version }}
           changelog: Automated publish from GitHub Actions
+          loaders: ${{ steps.gradleprops.outputs.loaders }}
+          game-versions: ${{ steps.gradleprops.outputs.game_versions }}
 
-      - name: Create GitHub Release and upload artifact
+      - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
           tag: v${{ steps.gradleprops.outputs.version }}
           name: v${{ steps.gradleprops.outputs.version }}
-          files: artifacts/*.jar
