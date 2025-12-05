@@ -23,7 +23,9 @@ object QuestManager {
         if (currentQuestScreen !is MenuQuestScreen) return
         val screen = currentQuestScreen as MenuQuestScreen
 
-        screen.bakeCategory(EV1Mod.gson.fromJson<Array<QuestCategory>>(data, arrayOf<QuestCategory>()::class.java).toList())
+        screen.bakeCategory(
+            EV1Mod.gson.fromJson<Array<QuestCategory>>(data, arrayOf<QuestCategory>()::class.java).toList()
+        )
     }
 
     fun receiveQuestTree(data: String) {

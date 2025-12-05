@@ -1,7 +1,6 @@
 package net.derfarmer
 
 import com.google.gson.Gson
-import net.derfarmer.screen.MenuQuestScreen
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper

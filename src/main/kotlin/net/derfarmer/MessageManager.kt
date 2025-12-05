@@ -59,6 +59,7 @@ object MessageManager {
                     )
                 )
             }
+
             'q' -> QuestManager.receiveQuest(msgData)
             'l' -> QuestManager.receiveQuestTree(msgData)
             'c' -> QuestManager.receiveCategorys(msgData)

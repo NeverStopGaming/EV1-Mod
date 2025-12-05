@@ -18,6 +18,7 @@ enum class QuestConditionType {
     HAVE_ITEM,
     KILL_MOB,
     BREAK_BLOCK,
+    CRAFT_ITEM
 }
 
 data class QuestReward(val type: QuestRewardType, val id: String, val iconID: String, val tooltip: String)

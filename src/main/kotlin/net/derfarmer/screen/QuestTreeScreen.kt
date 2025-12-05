@@ -62,7 +62,8 @@ class QuestTreeScreen(val questTreeID: Int, override val parent: Screen) : BaseQ
             context.setTooltipForNextFrame(Component.literal(questNode.title), mouseX, mouseY)
         }
 
-        val tint = if (questNode.completed) -1 else if (questNode.isLocked) MenuQuestScreen.textColorLocked else tintColor
+        val tint =
+            if (questNode.completed) -1 else if (questNode.isLocked) MenuQuestScreen.textColorLocked else tintColor
 
         context.blit(
             RenderPipelines.GUI_TEXTURED, texture, questNode.posX1, questNode.posY1,
@@ -80,7 +81,10 @@ class QuestTreeScreen(val questTreeID: Int, override val parent: Screen) : BaseQ
         val list = mutableListOf<BakedQuestNode>()
 
         nodes.forEach { node ->
-            val item = ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace(node.itemID)).getOrDefault(null) ?: return)
+            val item = ItemStack(
+                BuiltInRegistries.ITEM.get(ResourceLocation.withDefaultNamespace(node.itemID)).getOrDefault(null)
+                    ?: return
+            )
 
             val bgStartX = lastContextWidth - bgWidth shr 1
             val bgStartY = lastContextHeight - bgHeight shr 1
@@ -93,21 +97,22 @@ class QuestTreeScreen(val questTreeID: Int, override val parent: Screen) : BaseQ
 
             val filter = nodes.filter { it.connectionsTo.contains(node.questID) }
 
-            val locked = filter.isNotEmpty() || filter.any {!it.completed}
+            val locked = filter.isNotEmpty() && filter.all { !it.completed }
 
             list.add(
                 BakedQuestNode(
-                node.questID, node.itemID, node.title, node.x, node.y, node.completed, node.connectionsTo,
-               item, nodeX, nodeY, nodeX + nodeWidth, nodeY + nodeHeight,
-                node.connectionsTo.map { connection ->
-                    val other = nodes.first{ it.questID == connection}
-                    GuiHelper.Line(
-                        nodeMiddleX, nodeMiddleY,
-                        bgStartX + other.x, bgStartY + other.y, 2, textColor,
+                    node.questID, node.itemID, node.title, node.x, node.y, node.completed, node.connectionsTo,
+                    item, nodeX, nodeY, nodeX + nodeWidth, nodeY + nodeHeight,
+                    node.connectionsTo.map { connection ->
+                        val other = nodes.first { it.questID == connection }
+                        GuiHelper.Line(
+                            nodeMiddleX, nodeMiddleY,
+                            bgStartX + other.x, bgStartY + other.y, 2, textColor,
 
-                    )
-                }, locked
-            ))
+                            )
+                    }, locked
+                )
+            )
         }
 
         backedNodes = list

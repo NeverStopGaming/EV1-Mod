@@ -14,5 +14,5 @@ class BakedQuestNode(
     override val completed: Boolean, connectionsTo: List<Int>,
     val item: ItemStack, val posX1: Int, val posY1: Int, val posX2: Int, val posY2: Int,
     val lines: List<GuiHelper.Line>,
-    val isLocked : Boolean,
+    val isLocked: Boolean,
 ) : QuestNode(questID, itemID, title, x, y, completed, connectionsTo)

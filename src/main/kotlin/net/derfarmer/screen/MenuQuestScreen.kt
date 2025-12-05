@@ -1,6 +1,5 @@
 package net.derfarmer.screen
 
-import net.derfarmer.QuestManager
 import net.derfarmer.quest.BakedQuestCategory
 import net.derfarmer.quest.QuestCategory
 import net.derfarmer.utils.GuiHelper
@@ -99,7 +98,7 @@ object MenuQuestScreen : BaseQuestScreen(null) {
 
     override fun mouseClicked(mouseButtonEvent: MouseButtonEvent, bl: Boolean): Boolean {
         if (hoverID == 0) return false
-        if (backedCategorys.first { it.id == hoverID }.completed == -1 ) return false
+        if (backedCategorys.first { it.id == hoverID }.completed == -1) return false
 
         turnPage(QuestTreeScreen(hoverID, this))
 

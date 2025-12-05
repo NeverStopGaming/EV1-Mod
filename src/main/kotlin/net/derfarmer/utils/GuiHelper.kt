@@ -59,8 +59,19 @@ object GuiHelper {
         poseStack.popMatrix()
     }
 
-    fun drawTextureScaled(context: GuiGraphics, resourceLocation : ResourceLocation, x: Float, y: Float,  u : Float, v : Float,width: Int, height : Int,
-                          textureWidth : Int, textureHeight: Int, scale : Float) {
+    fun drawTextureScaled(
+        context: GuiGraphics,
+        resourceLocation: ResourceLocation,
+        x: Float,
+        y: Float,
+        u: Float,
+        v: Float,
+        width: Int,
+        height: Int,
+        textureWidth: Int,
+        textureHeight: Int,
+        scale: Float
+    ) {
         val matrix = context.pose()
         matrix.pushMatrix()
 
@@ -68,7 +79,7 @@ object GuiHelper {
         matrix.scale(scale, scale)
 
         context.blit(
-            RenderPipelines.GUI_TEXTURED,resourceLocation, 0, 0,
+            RenderPipelines.GUI_TEXTURED, resourceLocation, 0, 0,
             u, v, width, height, textureWidth, textureHeight
         )
 
