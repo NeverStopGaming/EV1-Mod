@@ -4,7 +4,9 @@
 # against bad commits.
 
 name: build
-on: [ pull_request, push ]
+on:
+  pull_request: {}
+  push: {}
 
 jobs:
   build:
@@ -17,8 +19,8 @@ jobs:
       - name: setup jdk
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'microsoft'
+          java-version: "21"
+          distribution: "microsoft"
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
       - name: build
@@ -28,3 +30,70 @@ jobs:
         with:
           name: Artifacts
           path: build/libs/
+
+  publish:
+    name: Publish (Modrinth + GitHub Release)
+    needs: build
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Artifacts
+          path: artifacts
+
+      - name: find built jar
+        id: findjar
+        run: |
+          shopt -s nullglob || true
+          JAR=$(ls artifacts/*.jar 2>/dev/null | head -n 1 || true)
+          if [ -z "$JAR" ]; then
+            echo "No JAR found in artifacts/" >&2
+            exit 1
+          fi
+          echo "jar=$JAR" >> $GITHUB_OUTPUT
+
+      - name: read gradle properties
+        id: gradleprops
+        run: |
+          if [ ! -f gradle.properties ]; then
+            echo "gradle.properties not found" >&2
+            exit 1
+          fi
+          VERSION=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2- | tr -d '\r')
+          # We mark compatibility with all 1.20.x versions per repo request
+          GAME_VERSIONS_LIST="1.20.0,1.20.1,1.20.2,1.20.3,1.20.4,1.20.5,1.20.6,1.20.7,1.20.8,1.20.9,1.20.10"
+          # Default loader to fabric; change to comma-separated list to support more loaders
+          LOADERS="fabric"
+          if [ -z "$VERSION" ]; then
+            echo "mod_version not set in gradle.properties" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "game_versions=$GAME_VERSIONS_LIST" >> $GITHUB_OUTPUT
+          echo "loaders=$LOADERS" >> $GITHUB_OUTPUT
+
+      - name: Modrinth Publish
+        uses: cloudnode-pro/modrinth-publish@v2.1.5
+        with:
+          token: ${{ secrets.MODRINTH_TOKEN }}
+          project_id: ${{ secrets.MODRINTH_PROJECT_ID }}
+          file: ${{ steps.findjar.outputs.jar }}
+          version_name: ${{ steps.gradleprops.outputs.version }}
+          version_type: release
+          game_versions: ${{ steps.gradleprops.outputs.game_versions }}
+          loaders: ${{ steps.gradleprops.outputs.loaders }}
+          changelog: Automated publish from GitHub Actions
+
+      - name: Create GitHub Release and upload artifact
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ steps.gradleprops.outputs.version }}
+          name: v${{ steps.gradleprops.outputs.version }}
+          files: artifacts/*.jar
