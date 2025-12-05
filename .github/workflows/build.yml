@@ -85,8 +85,8 @@ jobs:
 
           VERSION=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2- | tr -d '\r')
 
-          # Minecraft-Versionen (alle 1.20.x)
-          GAME_VERSIONS_LIST="1.20.0,1.20.1,1.20.2,1.20.3,1.20.4,1.20.5,1.20.6,1.20.7,1.20.8,1.20.9,1.20.10"
+          # Minecraft-Version aus gradle.properties verwenden
+          MC=$(grep '^minecraft_version=' gradle.properties | cut -d'=' -f2- | tr -d '\r')
 
           # Loader (kannst du ggf. anpassen, z.B. "fabric,quilt")
           LOADERS="fabric"
@@ -97,11 +97,11 @@ jobs:
           fi
 
           echo "Version: $VERSION"
-          echo "Game versions: $GAME_VERSIONS_LIST"
+          echo "Minecraft version (from gradle.properties): $MC"
           echo "Loaders: $LOADERS"
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "game_versions=1.20" >> "$GITHUB_OUTPUT"
+          echo "game_versions=$MC" >> "$GITHUB_OUTPUT"
           echo "loaders=$LOADERS" >> "$GITHUB_OUTPUT"
 
       - name: Modrinth Publish
