@@ -84,7 +84,9 @@ jobs:
         with:
           token: ${{ secrets.MODRINTH_TOKEN }}
           project: ${{ secrets.MODRINTH_PROJECT_ID }}
-          files: artifacts/*.jar
+          # Pass the exact jar path found earlier so the action can open the file
+          files: ${{ steps.findjar.outputs.jar }}
+          primary-file: ${{ steps.findjar.outputs.jar }}
           name: v${{ steps.gradleprops.outputs.version }}
           version: ${{ steps.gradleprops.outputs.version }}
           changelog: Automated publish from GitHub Actions
