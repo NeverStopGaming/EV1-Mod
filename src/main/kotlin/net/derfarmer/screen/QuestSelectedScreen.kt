@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.ARGB
 import net.minecraft.world.item.ItemStack
 import kotlin.jvm.optionals.getOrDefault
+import kotlin.math.roundToInt
 
 class QuestSelectedScreen(val questId: Int, override val parent: Screen?) : BaseQuestScreen(parent) {
 
@@ -134,12 +135,12 @@ class QuestSelectedScreen(val questId: Int, override val parent: Screen?) : Base
                 conditions.tooltip + " (${conditions.currentAmount}/${conditions.amount})"
             )
 
-            val progress = (100 / conditions.amount) * conditions.currentAmount
+            val progress = (100.0 / conditions.amount) * conditions.currentAmount
 
             GuiHelper.drawStringScaled(
-                context, "$progress%",
+                context, "${progress.roundToInt()}%",
                 startX + 1.6f, startY + (itemBgHeight * 1.2f) - (minecraft!!.font.lineHeight * 0.8f),
-                if (progress == 100) MenuQuestScreen.textColorComplete else white, 0.7f, true
+                if (progress == 100.0) MenuQuestScreen.textColorComplete else white, 0.7f, true
             )
         }
 
