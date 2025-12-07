@@ -71,7 +71,7 @@ object MenuQuestScreen : BaseQuestScreen(null) {
 
     fun bakeCategory(categorys: List<QuestCategory>) {
         val list = mutableListOf<BakedQuestCategory>()
-        val betweenOffset = 25
+        val betweenOffset = 23
 
         val offset = (lastContextHeight shr 1) - (categorys.size * betweenOffset shr 1)
 
