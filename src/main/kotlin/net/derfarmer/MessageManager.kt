@@ -1,5 +1,6 @@
 package net.derfarmer
 
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.toasts.SystemToast
 import net.minecraft.network.chat.Component
@@ -63,7 +64,15 @@ object MessageManager {
             'q' -> QuestManager.receiveQuest(msgData)
             'l' -> QuestManager.receiveQuestTree(msgData)
             'c' -> QuestManager.receiveCategorys(msgData)
+            'o' -> QuestManager.openBook()
+            'm' -> sendMods()
+            '0' -> sendMessage("0")
         }
 
+    }
+
+    fun sendMods() {
+        val mods = FabricLoader.getInstance().allMods.joinToString(";") { "${it.metadata.name}%%%${it.metadata.version}"}
+        sendMessage("m$mods")
     }
 }

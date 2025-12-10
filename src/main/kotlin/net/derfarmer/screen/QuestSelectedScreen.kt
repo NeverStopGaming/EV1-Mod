@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.ARGB
 import net.minecraft.world.item.ItemStack
 import kotlin.jvm.optionals.getOrDefault
+import kotlin.math.roundToInt
 
 class QuestSelectedScreen(val questId: Int, override val parent: Screen?) : BaseQuestScreen(parent) {
 
@@ -117,12 +118,15 @@ class QuestSelectedScreen(val questId: Int, override val parent: Screen?) : Base
 
     fun drawConditions(context: GuiGraphics, mouseX: Int, mouseY: Int, quest: Quest) {
 
-        // TODO: Draw Submit Or Detect button
-
-        for ((i, conditions) in quest.conditions.withIndex()) {
+        for ((i, condition) in quest.conditions.withIndex()) {
 
             val startX = padding * i + halfWidth + padding
             val startY = bgStartY + 140
+
+            val itemID = when(condition.type) {
+                QuestConditionType.KILL_MOB -> "${condition.id}_spawn_egg"
+                else -> condition.id
+            }
 
             drawItem(
                 context,
@@ -130,16 +134,16 @@ class QuestSelectedScreen(val questId: Int, override val parent: Screen?) : Base
                 startY,
                 mouseX,
                 mouseY,
-                conditions.id,
-                conditions.tooltip + " (${conditions.currentAmount}/${conditions.amount})"
+                itemID,
+                condition.tooltip + " (${condition.currentAmount}/${condition.amount})"
             )
 
-            val progress = (100 / conditions.amount) * conditions.currentAmount
+            val progress = (100.0 / condition.amount) * condition.currentAmount
 
             GuiHelper.drawStringScaled(
-                context, "$progress%",
+                context, "${progress.roundToInt()}%",
                 startX + 1.6f, startY + (itemBgHeight * 1.2f) - (minecraft!!.font.lineHeight * 0.8f),
-                if (progress == 100) MenuQuestScreen.textColorComplete else white, 0.7f, true
+                if (progress == 100.0) MenuQuestScreen.textColorComplete else white, 0.7f, true
             )
         }
 
