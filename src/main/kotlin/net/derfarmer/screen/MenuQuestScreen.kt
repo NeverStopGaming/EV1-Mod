@@ -50,12 +50,12 @@ object MenuQuestScreen : BaseQuestScreen(null) {
 
             if (isHover) hoverID = category.id
 
-            /*if (category.completed >= 100) {
+            if (category.completed >= 100) {
                 text = textColorComplete
             } else if (category.completed == -1) {
                 text = textColorLocked
-                description = "Nicht Freigeschaltet"
-            }*/
+             //   description = "Nicht Freigeschaltet"
+            }
 
             context.drawString(minecraft!!.font, category.title, category.xPos, category.yPos, text, isHover);
 
