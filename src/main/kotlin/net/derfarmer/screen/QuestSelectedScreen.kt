@@ -120,19 +120,8 @@ class QuestSelectedScreen(val questId: Int, override val parent: Screen?) : Base
 
         for ((i, condition) in quest.conditions.withIndex()) {
 
-            var startX = padding * i + halfWidth + padding
-            var startY = bgStartY + 140
-
-            // TODO: PLEASE FIX THIS SHIT
-            if (i > 5) {
-                startX = padding * (i - 6) + halfWidth + padding
-                startY = bgStartY + 160
-            }
-
-            if (i > 11) {
-                startX = padding * (i - 12) + halfWidth + padding
-                startY = bgStartY + 180
-            }
+            val startX = padding * (i % 6) + halfWidth + padding
+            val startY = bgStartY + 140 + ((i / 6) * 20)
 
             val itemID = when(condition.type) {
                 QuestConditionType.KILL_MOB -> "${condition.id}_spawn_egg"
@@ -162,7 +151,7 @@ class QuestSelectedScreen(val questId: Int, override val parent: Screen?) : Base
         if (quest.conditions.any { it.type == QuestConditionType.SUBMIT_ITEM }) {
 
             val startX = halfWidth + padding
-            val startY = bgStartY + 165
+            val startY = bgStartY + 165+ ((quest.conditions.size / 6) * 20)
 
             isButtonHover = isPointInRect(mouseX, mouseY, startX, startY, startX + buttonWidth, startY + buttonHeight)
 
