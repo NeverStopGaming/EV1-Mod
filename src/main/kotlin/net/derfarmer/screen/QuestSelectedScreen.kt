@@ -120,8 +120,19 @@ class QuestSelectedScreen(val questId: Int, override val parent: Screen?) : Base
 
         for ((i, condition) in quest.conditions.withIndex()) {
 
-            val startX = padding * i + halfWidth + padding
-            val startY = bgStartY + 140
+            var startX = padding * i + halfWidth + padding
+            var startY = bgStartY + 140
+
+            // TODO: PLEASE FIX THIS SHIT
+            if (i > 5) {
+                startX = padding * (i - 6) + halfWidth + padding
+                startY = bgStartY + 160
+            }
+
+            if (i > 11) {
+                startX = padding * (i - 12) + halfWidth + padding
+                startY = bgStartY + 180
+            }
 
             val itemID = when(condition.type) {
                 QuestConditionType.KILL_MOB -> "${condition.id}_spawn_egg"

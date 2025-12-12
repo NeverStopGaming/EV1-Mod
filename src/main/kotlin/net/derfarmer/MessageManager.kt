@@ -72,7 +72,9 @@ object MessageManager {
     }
 
     fun sendMods() {
-        val mods = FabricLoader.getInstance().allMods.joinToString(";") { "${it.metadata.name}%%%${it.metadata.version}"}
-        sendMessage("m$mods")
+        val mods = FabricLoader.getInstance().allMods.joinToString(";") { "${it.metadata.name}"}.chunked(200)
+        mods.forEach {
+            sendMessage("m$it")
+        }
     }
 }
