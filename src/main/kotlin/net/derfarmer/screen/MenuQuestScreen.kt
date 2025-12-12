@@ -46,24 +46,26 @@ object MenuQuestScreen : BaseQuestScreen(null) {
 
             val isHover = isPointInRect(mouseX, mouseY, category.xPos, category.yPos, category.x2Pos, category.y2Pos)
             var text = if (isHover) textColorHover else textColor
-            var description = "${category.completed}% abgeschlossen"
+            //var description = "${category.completed}% abgeschlossen"
 
             if (isHover) hoverID = category.id
 
-            if (category.completed >= 100) {
+            /*if (category.completed >= 100) {
                 text = textColorComplete
             } else if (category.completed == -1) {
                 text = textColorLocked
                 description = "Nicht Freigeschaltet"
-            }
+            }*/
 
             context.drawString(minecraft!!.font, category.title, category.xPos, category.yPos, text, isHover);
 
 
+            /*
             GuiHelper.drawStringScaled(
                 context, description,
                 category.xPos + 25f, category.yPos + 10f, text, 0.6f, isHover
             );
+             */
         }
 
         context.drawString(minecraft!!.font, "Mehr Quests mehr Spaß", x, y + 150, textColor, false);
@@ -71,7 +73,7 @@ object MenuQuestScreen : BaseQuestScreen(null) {
 
     fun bakeCategory(categorys: List<QuestCategory>) {
         val list = mutableListOf<BakedQuestCategory>()
-        val betweenOffset = 23
+        val betweenOffset = 20
 
         val offset = (lastContextHeight shr 1) - (categorys.size * betweenOffset shr 1)
 
