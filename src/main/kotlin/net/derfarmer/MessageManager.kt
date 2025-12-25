@@ -10,6 +10,7 @@ object MessageManager {
 
     const val COMMAND = "fabricdata "
     var isFirstMessage = false
+    var isSinglePlayer = false
 
     fun receive(text: Component): Boolean {
 
@@ -18,14 +19,19 @@ object MessageManager {
         if (message.startsWith("/")) return false
 
         if (!isFirstMessage) {
-            sendMessage("0")
+
             isFirstMessage = true
+
+            isSinglePlayer = Minecraft.getInstance().isSingleplayer
+            if (isSinglePlayer) {
+                return  false
+            }
+
+            sendMessage("0")
             return true
         }
 
-        EV1Mod.logger.info(text.string)
-
-        if (message.startsWith(COMMAND)) {
+        if (message.startsWith(COMMAND) && !isSinglePlayer) {
             parseMessage(message.substring(COMMAND.length))
             return true
         }
