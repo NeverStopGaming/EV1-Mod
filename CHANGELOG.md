@@ -6,10 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased changes
 
+### Feature
+- bump version [`147a4c2`](https://github.com/NeverStopGaming/EV1-Mod/commit/147a4c2)
+
 ### Bug Fixes
+- error messages in singleplayer [`10f7ad1`](https://github.com/NeverStopGaming/EV1-Mod/commit/10f7ad1)
 - submit button positon [`6bfad98`](https://github.com/NeverStopGaming/EV1-Mod/commit/6bfad98)
 
+### Documentation
+- :robot: changelog file generated [`f3e6536`](https://github.com/NeverStopGaming/EV1-Mod/commit/f3e6536)
+
 ### Other
+- Merge remote-tracking branch 'origin/dev' into dev [`bdacbff`](https://github.com/NeverStopGaming/EV1-Mod/commit/bdacbff)
 - Simplify push trigger configuration for changelog [`b6ff72f`](https://github.com/NeverStopGaming/EV1-Mod/commit/b6ff72f)
 - Add workflow to generate and commit changelog [`2e2f789`](https://github.com/NeverStopGaming/EV1-Mod/commit/2e2f789)
 
